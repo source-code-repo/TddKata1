@@ -26,37 +26,29 @@ public class StringCalculator {
 
         List<String> extractedNums = new ArrayList<String>(List.of(numbers));
         extractedNums = extractNums(delimiters, extractedNums);
-
-        List<Integer> values = new ArrayList<>();
-        List<Integer> negatives = new ArrayList<>();
-        for(String n : extractedNums) {
-            Integer value = Integer.parseInt(n);
-            if(value < 0) {
-                negatives.add(value);
-            } else if(value > 1000) {
-                // ignore
-            } else {
-                values.add(value);
-            }
-        }
-
-        // exception if negative
-        if(negatives.size() > 0) {
-            final StringBuilder error = new StringBuilder("negatives not allowed:");
-            negatives.forEach(n -> error.append(" " + n));
+        
+        final StringBuilder error = new StringBuilder("negatives not allowed:");
+        boolean errors = extractedNums.stream()
+                .mapToInt(Integer::parseInt)
+                .filter(i -> i < 0)
+                .peek(i -> error.append(" " + i))
+                .count() > 0;
+        if(errors) {
             throw new IllegalStateException(error.toString());
         }
 
-        return values.stream().mapToInt(Integer::intValue).sum();
+        return extractedNums.stream()
+                .mapToInt(Integer::parseInt)
+                .filter(i -> i <= 1000)
+                .sum();
     }
 
     private String getCustomDelimiter(String numbers) {
-        if(numbers.matches(MULTI_CHAR_DELIMITER)) { // Multi-char delimiter
+        if(numbers.matches(MULTI_CHAR_DELIMITER)) {
             Pattern pattern = Pattern.compile(MULTI_CHAR_DELIMITER);
             Matcher matcher = pattern.matcher(numbers);
-            if (matcher.find()) {
-                return matcher.group(1);
-            }
+            matcher.find();
+            return matcher.group(1);
         } else if(numbers.startsWith("//")) { // Single char delimiter
             return Character.toString(numbers.charAt(2));
         }
