@@ -24,8 +24,7 @@ public class StringCalculator {
             delimiters.add(customDelimiter);
         }
 
-        List<String> extractedNums = new ArrayList<String>(List.of(numbers));
-        extractedNums = extractNums(delimiters, extractedNums);
+        List<String> extractedNums = extractNums(delimiters, List.of(numbers));
         
         final StringBuilder error = new StringBuilder("negatives not allowed:");
         boolean errors = extractedNums.stream()
