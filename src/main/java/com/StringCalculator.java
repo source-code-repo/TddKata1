@@ -17,7 +17,7 @@ public class StringCalculator {
         callCount++;
 
         List<String> delimiters = getDelimiters(numbers);
-        if(delimiters.size() > 2) {
+        if(delimiters.size() > 2) { // custom delimiter used, need to skip header
             numbers = numbers.substring(numbers.indexOf("\n") + 1);
         }
 
