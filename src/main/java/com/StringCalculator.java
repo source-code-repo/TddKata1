@@ -3,8 +3,10 @@ package com;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class StringCalculator {
     // regex to identify a multi-char delimiter
@@ -13,9 +15,6 @@ public class StringCalculator {
 
     public int add(String numbers) {
         callCount++;
-        if(numbers.isEmpty()) {
-            return 0;
-        }
 
         List<String> delimiters = new ArrayList<>(List.of(",", "\n"));
         String customDelimiter = getCustomDelimiter(numbers);
@@ -24,22 +23,24 @@ public class StringCalculator {
             delimiters.add(customDelimiter);
         }
 
-        List<String> extractedNums = extractNums(delimiters, List.of(numbers));
-        
-        final StringBuilder error = new StringBuilder("negatives not allowed:");
-        boolean errors = extractedNums.stream()
-                .mapToInt(Integer::parseInt)
-                .filter(i -> i < 0)
-                .peek(i -> error.append(" " + i))
-                .count() > 0;
-        if(errors) {
-            throw new IllegalStateException(error.toString());
+        List<Integer> ints = extractNums(delimiters, List.of(numbers))
+                .stream()
+                .filter(Predicate.not(String::isEmpty))
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
+
+        // Throw exception if any numbers are negative
+        if(ints.stream().anyMatch(i -> i < 0)) {
+            throw new IllegalStateException("negatives not allowed:" +
+                    ints.stream()
+                            .filter(i -> i < 0)
+                            .map(i -> " " + i)
+                            .collect(Collectors.joining()));
         }
 
-        return extractedNums.stream()
-                .mapToInt(Integer::parseInt)
+        return ints.stream()
                 .filter(i -> i <= 1000)
-                .sum();
+                .collect(Collectors.summingInt(i->i));
     }
 
     private String getCustomDelimiter(String numbers) {
