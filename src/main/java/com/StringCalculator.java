@@ -16,11 +16,9 @@ public class StringCalculator {
     public int add(String numbers) {
         callCount++;
 
-        List<String> delimiters = new ArrayList<>(List.of(",", "\n"));
-        String customDelimiter = getCustomDelimiter(numbers);
-        if(!customDelimiter.isEmpty()) {
+        List<String> delimiters = getDelimiters(numbers);
+        if(delimiters.size() > 2) {
             numbers = numbers.substring(numbers.indexOf("\n") + 1);
-            delimiters.add(customDelimiter);
         }
 
         List<Integer> ints = tokenize(delimiters, List.of(numbers))
@@ -43,15 +41,15 @@ public class StringCalculator {
                 .collect(Collectors.summingInt(i->i));
     }
 
-    private String getCustomDelimiter(String numbers) {
-        Pattern pattern = Pattern.compile(MULTI_CHAR_DELIMITER);
-        Matcher matcher = pattern.matcher(numbers);
-        if(matcher.find()) { // Multi-char delimiter
-            return matcher.group(1);
-        } else if(numbers.startsWith("//")) { // Single char delimiter
-            return Character.toString(numbers.charAt(2));
+    private List<String> getDelimiters(String numbers) {
+        Matcher matcher = Pattern.compile(MULTI_CHAR_DELIMITER).matcher(numbers);
+        List<String> delimiters = new ArrayList<>(List.of(",", "\n"));
+        if(matcher.find()) { // Multi-char custom delimiter
+            delimiters.add(matcher.group(1));
+        } else if(numbers.startsWith("//")) { // Single char custom delimiter
+            delimiters.add(Character.toString(numbers.charAt(2)));
         }
-        return ""; // No custom delimiter
+        return delimiters;
     }
 
     /**
